@@ -1,0 +1,481 @@
+--==================================================================================
+--						                Tabular Function
+--==================================================================================
+Create Function hrm.fn_SalaryHistory()
+Returns table
+As
+Return
+(
+Select *
+From hrm.Salary_Sheet where SalaryID=1
+)
+GO
+
+Select * From hrm.fn_SalaryHistory()
+GO
+
+
+--====================================================================
+--							         DML PART
+--====================================================================
+
+TRUNCATE TABLE hrm.Employee
+TRUNCATE TABLE hrm.Department
+TRUNCATE TABLE hrm.Designations
+TRUNCATE TABLE hrm.JobLocation
+TRUNCATE TABLE hrm.Salary_Sheet
+GO
+
+Select * From hrm.Employees
+Select * From hrm.Department
+Select * From hrm.Designations
+Select * From hrm.JobLocation
+Select * From hrm.Salary_Sheet
+Go
+
+USE HumanResourceManagement
+GO
+
+--==================================================================================================================
+--                     INSERT INTO EMPLOYEEES TABLE  T_1
+--==================================================================================================================
+
+INSERT INTO hrm.Employees (FirstName, LastName,  JoiningDate, PsesentAddress, PermanentAddress, MobileNo, EmailAddress) 
+				Values ('Iftekhar', 'Ahammed', '01/01/2022', ' Ctg', ' Feni ', '01829628862', 'iftekharahammed1@gmail.com'),
+					   ('Hasan', 'Mahmud', '01/01/2020', ' Ctg', ' Dhaka ', '01658628462', 'hasan@gmail.com'),
+					   ('Khalil', 'Ahammed', '01/05/2019', ' Ctg', ' Comilla ', '01658628842', 'Khalil@gmail.com'),
+					   ('Subhan', 'Mahmud', '07/07/2018', ' Ctg', ' Maymansing ', '01929628567', 'subhan@gmail.com');
+GO
+
+
+--==================================================================================================================
+--                     INSERT INTO DEPARTMENT TABLE     T_2
+--==================================================================================================================
+
+INSERT INTO hrm.Department (DeptName, [Description]) 
+				Values ('Accounts', ''), ('Sales & Marketing', ''), ('Brand & Marketing', ''), 
+					   ('Audit', ''), ('Purchase', '');
+GO
+
+--==================================================================================================================
+--                     INSERT INTO Designations TABLE          T_3
+--==================================================================================================================
+INSERT INTO hrm.Designations (DesignationId, Designation, Remarks) 
+				Values (1, 'Junior Accounts', 'Accounts Department'), 
+					   (30, 'Junior Sales Officer', 'Sales & Marketing'), 
+					   (60,'Brand Officer', 'Brand & Marketing'), 
+					   (90,'Junior Audit officer', 'Audit Department'), 
+					   (120, 'Junior Officer', 'Purchase Department');
+GO
+
+--==================================================================================================================
+--                     INSERT INTO JobLocation TABLE           T_4
+--==================================================================================================================
+
+INSERT INTO hrm.JobLocation (PostingLocation, [Description]) 
+				Values ('Dhaka', ''), ('Gazipur', ''), ('Narayanganj', ''), ('MunshiGanj', ''), ('Narsingdee', '');
+GO
+
+--==================================================================================================================
+--									   INSERT INTO RecruitmentInfo TABLE			T_5
+--==================================================================================================================
+
+INSERT INTO hrm.RecruitmentInfo (EmployeeID, DepartmentId, DesignationId, LocationId) 
+				Values (1001, 3, 60, 1);
+GO
+
+--==================================================================================================================
+--									  INSERT INTO Salary_Sheet TABLE			T_6
+--==================================================================================================================
+
+INSERT INTO hrm.Salary_Sheet (EmployeeID, BasicSalary, Houserent, Medical, MobileBill, travelAllowance) 
+				Values (1001, 20000.00, 2500.00, 1500.00, 1000.00, 2000.00);
+GO
+
+--==================================================================================================
+--					Crud operation in (View: vw_EmployeeInfo) view_01
+--==================================================================================================
+Insert into vw_EmployeeInfo (FirstName, LastName,  JoiningDate, PsesentAddress, PermanentAddress, MobileNo, EmailAddress)
+						Values ('Golam', 'Azam', '01/01/2022', ' Dhaka', ' Feni ', '01825628862', 'azam@gmail.com'),
+							   ('Abdur', 'Rahman', '01/03/2022', ' Dhaka', ' Cumilla ', '01985628862', 'abdur12@gmail.com');
+
+UPDATE vw_EmployeeInfo 
+SET MobileNo = '01985635415' Where EmployeeID = 1003
+
+DELETE FROM vw_EmployeeInfo
+Where EmployeeID = 1002
+GO
+
+--===================================================================================================================
+--							CrudOperation: Insert Update Delete By Store Procedure (Proc sp_Employees) sp_01
+--====================================================================================================================
+
+Exec sp_Employees 1005,'Jamal','Uddin', '01/05/2020','Ctg','Comilla','01698547569','jamal@gmail.com', '0125875668798', 'hrm.Employees', 'Insert';
+GO
+
+Exec sp_Employees 1006,'Jamal','Uddin', '01/05/2020','Ctg','Comilla','01698547569','jamal@gmail.com', '0125875668798', 'hrm.Employees', 'Update';
+GO
+
+Exec sp_Employees 1006,'Jamal','Uddin', '01/05/2020','Ctg','Comilla','01698547569','jamal@gmail.com', '0125875668798', 'hrm.Employees', 'Delete';
+GO
+
+Select * From hrm.Employees
+GO
+
+ --================================================================================================================
+--										Query from function hrm.Salary_details fn_01
+--=================================================================================================================
+declare @result int = hrm.Salary_details (20000, 2500, 1500, 1000, 2500)
+select @result
+GO	
+
+SELECT hrm.Salary_details (20000, 2500, 1500, 1000, 2500)
+PRINT hrm.Salary_details (20000, 2500, 1500, 1000, 2500)
+GO
+
+--================================================================================================================
+--										INNER JOIN
+--================================================================================================================
+SELECT e.EmployeeID,e.FirstName,e.JoiningDate,e.EmailAddress,d.DeptName,des.Designation,BasicSalary,sa.Houserent,sa.Medical,sa.Medical,sa.MobileBill,sa.travelAllowance
+FROM hrm.Employees e
+INNER JOIN hrm.RecruitmentInfo r ON e.EmployeeID = r.EmployeeID
+INNER JOIN hrm.Department d ON d.DepartmentId = r.DepartmentId
+INNER JOIN hrm.Designations des ON des.DesignationId = r.DesignationId
+INNER JOIN hrm.Salary_Sheet sa ON sa.EmployeeID = e.EmployeeID
+ORDER BY e.EmployeeID
+GO
+
+SELECT e.EmployeeID, (e.FirstName + ' ' +e.LastName +', ' + EmailAddress) AS [Employee Info], DeptName
+FROM hrm.Employees e
+INNER JOIN hrm.RecruitmentInfo r ON e.EmployeeID = r.EmployeeID
+INNER JOIN hrm.Department d ON d.DepartmentId = r.DepartmentId
+ORDER BY e.EmployeeID
+GO
+
+--================================================================================================================
+--											LEFT JOIN
+--================================================================================================================
+SELECT *
+FROM hrm.Employees e
+LEFT JOIN hrm.Salary_Sheet s ON e.EmployeeID = s.EmployeeID
+ORDER BY e.EmployeeID
+GO
+
+--================================================================================================================
+--											RIGHT JOIN
+--================================================================================================================
+SELECT *
+FROM hrm.Salary_Sheet s
+RIGHT JOIN hrm.Employees e 
+ON e.EmployeeID = s.EmployeeID
+ORDER BY e.EmployeeID
+GO
+
+--================================================================================================================
+--											FULL JOIN
+--================================================================================================================
+SELECT e.EmployeeID,e.FirstName,e.JoiningDate,e.EmailAddress,d.DeptName,des.Designation,BasicSalary,sa.Houserent,sa.Medical,sa.Medical,sa.MobileBill,sa.travelAllowance
+FROM hrm.Employees e
+FULL JOIN hrm.RecruitmentInfo r ON e.EmployeeID = r.EmployeeID
+FULL JOIN hrm.Department d ON d.DepartmentId = r.DepartmentId
+FULL JOIN hrm.Designations des ON des.DesignationId = r.DesignationId
+FULL JOIN hrm.Salary_Sheet sa ON sa.EmployeeID = e.EmployeeID
+ORDER BY e.EmployeeID
+GO
+
+--================================================================================================================
+--											CROSS JOIN
+--================================================================================================================
+SELECT *
+FROM hrm.Department
+CROSS JOIN hrm.Designations
+GO
+
+--================================================================================================================
+--											SELF JOIN
+--================================================================================================================
+SELECT DISTINCT e1.EmployeeID
+FROM hrm.Employees e1, hrm.Employees e2
+WHERE e1.EmployeeID <> e2.EmployeeID
+GO
+
+SELECT * FROM hrm.Employees
+GO
+
+--================================================================================================================
+--										UNION Operator
+--================================================================================================================
+SELECT EmployeeID FROM hrm.Employees
+UNION
+SELECT EmployeeID FROM hrm.Salary_Sheet
+ORDER BY EmployeeID;
+
+--================================================================================================================
+--										Six Clauses
+--================================================================================================================
+SELECT PsesentAddress, count(employeeID)
+FROM hrm.Employees
+WHERE JoiningDate> '07/07/2018'
+GROUP BY PsesentAddress
+HAVING count(employeeID)>0
+
+--================================================================================================================
+--										Sub Query
+--================================================================================================================
+SELECT * 
+FROM hrm.JobLocation
+WHERE PostingLocation in (SELECT PostingLocation FROM hrm.JobLocation WHERE PostingLocation= 'Narayanganj')
+GO
+
+--================================================================================================================
+--											CTE
+--================================================================================================================
+WITH cte_Salary
+AS
+(SELECT EmployeeID,BasicSalary, Houserent, Medical, MobileBill, travelAllowance
+FROM hrm.Salary_Sheet WHERE Houserent<MobileBill)
+
+SELECT *
+FROM hrm.Salary_Sheet ss
+FULL JOIN cte_Salary s ON ss.SalaryID= s.BasicSalary
+GO
+
+--================================================================================================================
+--											Cube
+--================================================================================================================
+SELECT s.EmployeeID, SUM(Houserent) AS TotalHouseRant 
+FROM hrm.Salary_Sheet s
+JOIN hrm.Employees e ON e.EmployeeID = s.EmployeeID
+GROUP BY s.EmployeeID WITH CUBE
+GO
+
+--==================================================================================================================
+--Rollup
+--==================================================================================================================
+SELECT s.EmployeeID, SUM(Houserent) AS TotalHouseRant 
+FROM hrm.Salary_Sheet s
+JOIN hrm.Employees e ON e.EmployeeID = s.EmployeeID
+GROUP BY s.EmployeeID WITH ROLLUP
+GO
+
+--==================================================================================================================
+--Grouping sets
+--==================================================================================================================
+SELECT s.EmployeeID, e.JoiningDate, SUM(Houserent) AS TotalHouseRant 
+FROM hrm.Salary_Sheet s
+JOIN hrm.Employees e ON e.EmployeeID = s.EmployeeID
+GROUP BY GROUPING SETS (s.EmployeeID, e.JoiningDate)
+GO
+
+--==================================================================================================================
+-----------==--Case
+--==================================================================================================================
+SELECT EmployeeID, FirstName,
+	CASE FirstName
+		WHEN 'Hasan' THEN 'RIGHT'
+		WHEN 'Khalil' THEN 'BAD'
+		ELSE 'Bad' 
+	END AS Name
+FROM hrm.Employees
+
+--==================================================================================================================
+-------=====-- BETWEEN
+--==================================================================================================================
+
+WHERE EmployeeID BETWEEN 2 AND 3
+GO
+
+--==================================================================================================================
+------==== Query with OR 
+--==================================================================================================================
+SELECT*
+FROM hrm.Employees 
+WHERE FirstName='Hasan' OR LastName='Mahmud'
+GO
+
+--================================================================================================================== 
+----========Query  with AND 
+--==================================================================================================================FROM sm.Students
+SELECT*
+FROM hrm.Salary_Sheet
+WHERE EmployeeID =1001 AND BasicSalary=20000.00
+GO
+
+
+--==========================================================
+--================ Query with IN 
+--==========================================================
+SELECT EmployeeID
+FROM hrm.Employees 
+WHERE EmployeeID IN '1'
+GO
+
+--============================================================
+--=============--Query with NOT IN 
+--============================================================
+
+SELECT * 
+FROM hrm.Employees 
+WHERE PermanentAddress NOT IN ('Dhaka')
+GO
+
+--============================================================
+---=============---TOP
+--============================================================
+SELECT TOP 2 HE.EmployeeID, FirstName, JoiningDate, DeptName
+FROM hrm.Employees as HE JOIN hrm.RecruitmentInfo as HR
+on HE.EmployeeID =  HR.EmployeeID
+JOIN hrm.Department as D ON HR.RecruitmentID = D.DepartmentId
+ORDER BY  JoiningDate 
+GO
+
+--=================================================================
+---==============--WildCard & Like
+--=================================================================
+SELECT * 
+FROM hrm.Employees
+WHERE MobileNo LIKE '01852%'
+GO
+
+----===============================================================
+-----==== ----While Loop
+---================================================================
+DECLARE @g int
+SET @g=2
+WHILE @g<=4
+BEGIN
+		PRINT 'Value  ' + CAST(@g AS varchar)
+		SET @g=@g+1
+END
+GO
+
+---===================================================================
+-----===============--IIF
+---===================================================================
+SELECT EmployeeID, BasicSalary, Houserent,
+	IIF(EmployeeID<=1001, 20000.00, 1500.00) AS Due
+FROM hrm.Salary_Sheet
+GO
+
+--=======================================================================
+----================--Choose
+---======================================================================
+SELECT EmployeeID, BasicSalary, Houserent,
+	CHOOSE(EmployeeID<=1001, 20000.00, 1500.00) AS Due
+FROM hrm.Salary_Sheet
+WHERE BasicSalary + Houserent >10500
+GO
+
+--========================================================================
+---===========Isnull
+--========================================================================
+SELECT EmployeeID, BasicSalary, Houserent,
+	ISNULL(BasicSalary,'basic') AS basicS
+FROM hrm.Salary_Sheet
+GO
+
+----===============================================================================
+--Coalesce
+---================================================================================
+
+SELECT EmployeeID, BasicSalary, Houserent,
+	COALESCE(BasicSalary, 'basic') AS Due
+FROM hrm.Salary_Sheet
+GO
+
+-----===========================================================================
+--==========--Ranking Functions
+--==============================================================================
+SELECT ROW_NUMBER() OVER(PARTITION BY FirstName ORDER BY EmployeeID) AS RowNumbr, FirstName, EmployeeID
+FROM hrm.Employees
+
+SELECT RANK() OVER(PARTITION BY FirstName ORDER BY EmployeeID) AS RANK, FirstName, EmployeeID
+FROM hrm.Employees
+
+SELECT DENSE_RANK() OVER(PARTITION BY FirstName ORDER BY EmployeeID) AS DENSE_RANK, FirstName, EmployeeID
+FROM hrm.Employees
+
+SELECT NTILE(LastName) OVER(PARTITION BY FirstName ORDER BY EmployeeID) AS NTILE, FirstName, EmployeeID
+FROM hrm.Employees
+
+---=========================================================================
+--Analytical functions
+---=========================================================================
+SELECT FIRST_VALUE(FirstName) OVER(PARTITION BY MobileNo ORDER BY EmployeeID) AS FirstName, EmployeeID
+FROM hrm.Employees
+
+SELECT LAST_VALUE(FirstName) OVER(PARTITION BY MobileNo ORDER BY EmployeeID) AS FirstName, EmployeeID
+FROM hrm.Employees
+
+SELECT PERCENT_RANK() OVER(PARTITION BY JoiningDate ORDER BY EmployeeID) AS FirstName,LastName, EmployeeID
+FROM hrm.Employees
+
+SELECT PERCENTILE_CONT(.4) WITHIN GROUP  (ORDER BY EmployeeID)OVER(PARTITION BY EmployeeID) AS PERCENTILECOUNT, FirstName,LastName, EmployeeID
+FROM hrm.Employees
+
+SELECT CUME_DIST() WITHIN GROUP (ORDER BY EmployeeID)  OVER(PARTITION BY StudentID) AS FirstName, LastName, EmployeeID
+FROM hrm.Employees
+
+SELECT PERCENTILE_DISC(.5) WITHIN GROUP  (ORDER BY EmployeeID)OVER(PARTITION BY EmployeeID) AS PERCENTILE_DISC, FirstName,LastName, EmployeeID
+FROM hrm.Employees
+
+--======================================================================================================
+--Ceiling, Floor, Round
+--======================================================================================================
+SELECT CEILING(10.75) AS [Ceiling Value];
+GO
+SELECT FLOOR(60.50) AS [Floor Value];
+GO
+SELECT ROUND(37.65,1) AS [Round Value];
+GO
+SELECT ABS(-54.65) AS [Absolute Value];
+GO
+SELECT RAND(-56.65) AS [Random Value];
+GO
+SELECT ISNUMERIC('ABC') AS [IS NUMERIC?];
+GO
+
+--=================================================================================================
+--										Aggregate functions
+--=================================================================================================
+SELECT COUNT(BasicSalary) Basics, SUM(Houserent) Houserent, AVG(Medical) Medical
+FROM hrm.Salary_Sheet
+GO
+
+
+--Mathematical Operator
+SELECT 10+2 as [Sum]
+GO
+SELECT 10-2 as [Substraction]
+GO
+SELECT 10*3 as [Multiplication]
+GO
+SELECT 10/2 as [Divide]
+GO
+SELECT 10%3 as [Remainder]
+GO
+
+--Cast, Convert, Concatenation
+SELECT 'Today : ' + CAST(GETDATE() as varchar)
+Go
+
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),1)
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),2)
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),3)
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),4)
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),5)
+SELECT 'Today : ' + CONVERT(varchar,GETDATE(),6)
+GO
+
+--Isdate
+SELECT ISDATE('2030-05-21')
+--Datepart
+SELECT DATEPART(MONTH,'2030-05-21')
+--Datename
+SELECT DATENAME(MONTH,'2030-05-21')
+--Sysdatetime
+SELECT Sysdatetime()
+--UTC
+SELECT GETUTCDATE()
+
+
